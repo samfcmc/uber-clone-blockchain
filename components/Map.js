@@ -7,8 +7,6 @@ const style = {
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-console.log('TEST', { v: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN, v2: process.env.MAPBOX_ACCESS_TOKEN, env: process.env });
-
 export default function Map() {
 	useEffect(() => {
 		const map = new mapboxgl.Map({
@@ -20,6 +18,6 @@ export default function Map() {
 	}, []);
 
 	return (
-		<div className={style.wrapper} id="map">Map</div>
+		<div className={style.wrapper} id="map"></div>
 	)
 }
