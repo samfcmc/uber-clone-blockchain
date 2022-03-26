@@ -5,6 +5,7 @@ import uberSelect from '../assets/rides/uberSelect.png';
 import uberXL from '../assets/rides/uberXL.png';
 import ethLogo from '../assets/eth-logo.png';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 const style = {
   wrapper: `h-full flex flex-col`,
@@ -20,37 +21,22 @@ const style = {
   price: `mr-[-0.8rem]`,
 }
 
-const carList = [
-	{
-		service: 'UberX',
-		image: uberX,
-		priceMultiplier: 1,
-	},
-	{
-		service: 'UberBlack',
-		image: uberBlack,
-		priceMultiplier: 1.5,
-	},
-	{
-		service: 'UberBlackSuv',
-		image: uberBlackSuv,
-		priceMultiplier: 1.5,
-	},
-	{
-		service: 'UberSelect',
-		image: uberSelect,
-		priceMultiplier: 1.5,
-	},
-	{
-		service: 'UberXL',
-		image: uberXL,
-		priceMultiplier: 1.5,
-	},
-]
-
 const basePrice = 154;
 
 export default function RideSelector() {
+	const [carList, setCarList] = useState([]);
+
+	useEffect(() => {
+		(async () => {
+			try {
+				const response = fetch('/api/db/getRideTypes');
+				const data = await (await response).json();
+				setCarList(data.data);
+			} catch(error) {
+				console.error(error);
+			}
+		})();
+	}, []);
 	return (
 		<div className={style.wrapper}>
 			<div className={style.title}>
@@ -61,7 +47,7 @@ export default function RideSelector() {
 					<div className={style.car} key={index}>
 						<Image
 							className={style.carImage}
-							src={car.image} 
+							src={car.iconUrl} 
 							alt={car.service}
 							height={50}
 							width={50}

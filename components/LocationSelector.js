@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+
+import { UberContext } from '../context/uberContext';
 
 const style = {
   wrapper: `pt-2`,
@@ -13,8 +15,8 @@ const style = {
 
 export default function LocationSelector() {
 	const [inFocus, setInFocus] = useState('from');
-	const [pickup, setPickup] = useState('');
-	const [dropoff, setDropoff] = useState('');
+	
+	const { pickup, setPickup, dropoff, setDropoff } = useContext(UberContext);
 
 	return (
 		<div className={style.wrapper}>
