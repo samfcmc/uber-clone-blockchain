@@ -1,11 +1,8 @@
-import uberX from '../assets/rides/uberX.png';
-import uberBlack from '../assets/rides/uberBlack.png';
-import uberBlackSuv from '../assets/rides/uberBlackSuv.png';
-import uberSelect from '../assets/rides/uberSelect.png';
-import uberXL from '../assets/rides/uberXL.png';
 import ethLogo from '../assets/eth-logo.png';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext, useCallback } from 'react';
+
+import { UberContext } from '../context/uberContext';
 
 const style = {
   wrapper: `h-full flex flex-col`,
@@ -21,10 +18,8 @@ const style = {
   price: `mr-[-0.8rem]`,
 }
 
-const basePrice = 154;
-
 export default function RideSelector() {
-	const [carList, setCarList] = useState([]);
+	const { carList = [], setCarList, selectedRide, setSelectedRide, setPrice, basePrice } = useContext(UberContext);
 
 	useEffect(() => {
 		(async () => {
@@ -36,7 +31,16 @@ export default function RideSelector() {
 				console.error(error);
 			}
 		})();
-	}, []);
+	}, [setCarList]);
+
+	const computePrice = useCallback((car) => (basePrice / 10 ** 5) * car.priceMultiplier, [basePrice]);
+	const formatPrice = useCallback(price => (price).toFixed(5), []);
+
+	const onCarSelected = useCallback(car => {
+		setSelectedRide(car);
+		setPrice(computePrice(car));
+	}, [computePrice, setPrice, setSelectedRide]);
+
 	return (
 		<div className={style.wrapper}>
 			<div className={style.title}>
@@ -44,7 +48,13 @@ export default function RideSelector() {
 			</div>
 			<div className={style.carList}>
 				{carList.map((car, index) => (
-					<div className={style.car} key={index}>
+					<div key={index} 
+						className={`${
+							selectedRide.service === car.service
+							? style.selectedCar
+							: style.car
+						}`}
+						onClick={() => onCarSelected(car)}>
 						<Image
 							className={style.carImage}
 							src={car.iconUrl} 
@@ -62,7 +72,7 @@ export default function RideSelector() {
 						</div>
 						<div className={style.priceContainer}>
 							<div className={style.price}>
-								{((basePrice / 10 ** 5) * car.priceMultiplier).toFixed(5)}
+								{formatPrice(computePrice(car))}
 							</div>
 							<Image 
 									src={ethLogo} 

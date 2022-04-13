@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import RideSelector from './RideSelector';
+import { UberContext } from '../context/uberContext';
 
 const style = {
   wrapper: `flex-1 h-full flex flex-col justify-between`,
@@ -9,20 +10,56 @@ const style = {
 }
 
 export default function Confirm() {
-	const storeTripDetails = useCallback(async () => {
-		//TODO: Do stuff
-	}, []);
+	const { 
+		pickup, 
+		dropoff, 
+		currentAccount, 
+		price, 
+		selectedRide, 
+		pickupCoordinates, 
+		dropoffCoordinates,
+		metamask,
+	} = useContext(UberContext);
+
+	const storeTripDetails = useCallback(async (pickup, dropoff) => {
+		try {
+			await fetch('/api/db/saveTrips', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					pickupLocation: pickup,
+					dropoffLocation: dropoff,
+					userWalletAddress: currentAccount,
+					price, 
+					selectedRide,
+				}),
+			});
+			await metamask.request({
+				method: 'eth_sendTransaction',
+				params: [
+					{
+						from: currentAccount,
+						to: process.env.NEXT_PUBLIC_UBER_ADDRESS,
+					}
+				]
+			})
+		} catch(error) {
+			console.error('STORE TRIP DETAILS', { error });
+		}
+	}, [currentAccount, metamask, price, selectedRide]);
 
 	return (
 		<div className={style.wrapper}>
 			<div className={style.rideSelectorContainer}>
-				<RideSelector />
+				{pickupCoordinates && dropoffCoordinates && <RideSelector />}
 			</div>
 			<div className={style.confirmButtonContainer}>
 				<div className={style.confirmButtonContainer}>
 					<div className={style.confirmButton}
-						onClick={storeTripDetails}>
-						Confirm Uber X
+						onClick={() => storeTripDetails(pickup, dropoff)}>
+						Confirm {selectedRide.service}
 					</div>
 				</div>
 			</div>
